@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.Animation
+import androidx.annotation.DrawableRes
 import androidx.recyclerview.widget.RecyclerView
 import com.bayraktar.githubrepos.R
 import com.bayraktar.githubrepos.model.Repo
@@ -13,6 +14,14 @@ class RepositoryAdapter(private val animation: Animation) :
     RecyclerView.Adapter<RepositoryAdapter.ViewHolder>() {
     private var mRepos: MutableList<Repo> = ArrayList()
     private var listener: IRepoListener? = null
+
+    fun getList(): List<Repo> = mRepos.toList()
+
+    fun setFav(index: Int, boolean: Boolean )
+    {
+        mRepos[index].isFav = boolean
+        notifyItemChanged(index)
+    }
 
     fun setListener(listener: IRepoListener) {
         this.listener = listener
@@ -50,12 +59,22 @@ class RepositoryAdapter(private val animation: Animation) :
         RecyclerView.ViewHolder(view) {
         fun bind(item: Repo) {
             view.setOnClickListener { listener?.onClick(adapterPosition) }
-            view.startAnimation(animation)
+//            view.startAnimation(animation)
+            view.ivFav.setOnClickListener { listener?.onFavClick(adapterPosition) }
             view.tvRepoName.text = item.name ?: "UNKNOWN NAME"
+
+            @DrawableRes
+            val resId = when (item.isFav) {
+                true -> R.drawable.ic_star_24
+                false -> R.drawable.ic_unstar_24
+            }
+
+            view.ivFav.setImageResource(resId)
         }
     }
 }
 
 interface IRepoListener {
     fun onClick(index: Int)
+    fun onFavClick(index: Int)
 }

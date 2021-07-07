@@ -33,4 +33,6 @@ data class Repo(
 
     @SerializedName("owner")
     @Expose val owner: Owner?,
+
+    var isFav: Boolean
 ) : Parcelable

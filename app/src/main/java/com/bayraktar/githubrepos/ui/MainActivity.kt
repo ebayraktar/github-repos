@@ -2,20 +2,23 @@ package com.bayraktar.githubrepos.ui
 
 import android.content.Context
 import android.os.Bundle
+import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
-import com.google.android.material.navigation.NavigationView
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import androidx.drawerlayout.widget.DrawerLayout
-import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
 import com.bayraktar.githubrepos.R
+import com.bayraktar.githubrepos.utils.UIController
 import com.bayraktar.githubrepos.utils.common.gone
 import com.bayraktar.githubrepos.utils.common.visible
-import com.bayraktar.githubrepos.utils.UIController
+import com.google.android.material.navigation.NavigationView
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.content_main.*
 
 class MainActivity : AppCompatActivity(), UIController {
@@ -44,12 +47,14 @@ class MainActivity : AppCompatActivity(), UIController {
 
 
     override fun onSupportNavigateUp(): Boolean {
+        hideSoftKeyboard()
+
         val navController = findNavController(R.id.nav_host_fragment)
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
     }
 
     override fun displayProgressBar(isDisplayed: Boolean) {
-        if(isDisplayed)
+        if (isDisplayed)
             main_progress_bar.visible()
         else
             main_progress_bar.gone()
@@ -57,10 +62,27 @@ class MainActivity : AppCompatActivity(), UIController {
 
     override fun hideSoftKeyboard() {
         if (currentFocus != null) {
+            window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
+
             val inputMethodManager = getSystemService(
-                Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                Context.INPUT_METHOD_SERVICE
+            ) as InputMethodManager
             inputMethodManager
                 .hideSoftInputFromWindow(currentFocus!!.windowToken, 0)
         }
     }
+
+    override fun showToastMessage(message: String) {
+        Snackbar.make(clRoot, message, Snackbar.LENGTH_SHORT)
+            .setAction("OK") {
+
+            }
+            .show()
+    }
+
+    override fun showSnacbkarMessage(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    }
+
+
 }
