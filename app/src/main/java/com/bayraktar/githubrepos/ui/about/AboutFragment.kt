@@ -1,11 +1,19 @@
 package com.bayraktar.githubrepos.ui.about
 
+import android.content.Context
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import androidx.fragment.app.Fragment
 import com.bayraktar.githubrepos.R
+import com.bayraktar.githubrepos.utils.UIController
+import com.bayraktar.githubrepos.utils.common.gone
+import com.bayraktar.githubrepos.utils.common.visible
+import kotlinx.android.synthetic.main.fragment_about.*
+
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -17,10 +25,11 @@ private const val ARG_PARAM2 = "param2"
  * Use the [AboutFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class AboutFragment : Fragment() {
+class AboutFragment : Fragment(), WebAppInterface {
     // TODO: Rename and change types of parameters
     private var param1: String? = null
     private var param2: String? = null
+    private var uiController: UIController? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,6 +45,24 @@ class AboutFragment : Fragment() {
     ): View? {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_about, container, false)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        progress_circular.visible()
+
+        initPage()
+    }
+
+    private fun initPage() {
+        webView.loadUrl("https://raw.githubusercontent.com/ebayraktar/github-repos/master/README.md")
+        webView.webViewClient = MyWebViewClient(this)
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        if (context is UIController)
+            uiController = context
     }
 
     companion object {
@@ -57,4 +84,20 @@ class AboutFragment : Fragment() {
                 }
             }
     }
+
+    override fun onFinished() {
+        progress_circular.gone()
+    }
+}
+
+class MyWebViewClient(private val webAppInterface: WebAppInterface) : WebViewClient() {
+
+    override fun onPageFinished(view: WebView?, url: String?) {
+        super.onPageFinished(view, url)
+        webAppInterface.onFinished()
+    }
+}
+
+interface WebAppInterface {
+    fun onFinished()
 }

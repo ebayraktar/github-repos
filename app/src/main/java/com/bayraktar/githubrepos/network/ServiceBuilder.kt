@@ -21,14 +21,34 @@ object ServiceBuilder {
         .addConverterFactory(GsonConverterFactory.create())
         .client(client)
         .build()
-        .create(GitHubService::class.java)
+        .create(GitHubApi::class.java)
 
-    fun buildService(): GitHubService {
+    fun buildService(): GitHubApi {
         return retrofit
     }
 }
 
-interface GitHubService {
+
+class GitHubRepository(private val userApi: GitHubApi) {
+
+    var cachedRepos = emptyList<Repo>()
+
+    fun getRepos(username: String): Observable<List<Repo>> {
+        return if (cachedRepos.isEmpty()) {
+            //Returning users from API
+            userApi.getRepos(username)
+                .doOnNext { cachedRepos = it }
+        } else {
+            //Returning cached users first, and then API users
+            Observable.just(cachedRepos)
+                .mergeWith(userApi.getRepos(username))
+                .doOnNext { cachedRepos = it }
+        }
+
+    }
+}
+
+interface GitHubApi {
     @GET("users/{user}/repos")
-    fun listRepos(@Path("user") user: String?): Observable<List<Repo?>>
+    fun getRepos(@Path("user") user: String): Observable<List<Repo>>
 }
